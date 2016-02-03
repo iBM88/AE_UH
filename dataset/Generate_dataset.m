@@ -27,7 +27,18 @@ function [ data_var, data_raw ] = Generate_dataset( setting )
                             case VARIATION_COMBINATION.OR
                                 data_raw(s,:) = max(data_raw(s,:),full(setting.var{f}.map(:))');
                         end
-                    end
+                    end                    
+                case VARIATION_TYPE.GAUSSIAN
+                    data_var(s,f) = normrnd(setting.var{f}.mu, setting.var{f}.sigma);
+                    %   Generate raw data
+                    if(data_var(s,f))
+                        switch (setting.combination)
+                            case VARIATION_COMBINATION.OR
+                                data_raw(s,:) = max(data_raw(s,:),full(setting.var{f}.map(:))');
+                            case VARIATION_COMBINATION.SUM
+                                data_raw(s,:) = sum(data_raw(s,:),full(setting.var{f}.map(:))');
+                        end
+                    end    
             end
         end
         %   Add raw noise

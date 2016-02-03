@@ -1,15 +1,22 @@
 function [ AE ] = AE_train( AE, train_x, test_x, isVerbose)
 %Trains the autoencoder
 
+    % generate null dataset
+    null_x = zeros(size(train_x));    % TODO: should be fixed
+
     AE.dim = size(train_x,1);
     
     samples = size(train_x,2);
     
-    err_train = []; err_vec_train = []; 
-    err_test  = []; err_vec_test  = []; 
+    err_train = []; err_vec_train = [];  
+    err_test  = []; err_vec_test  = [];  
+    err_null  = []; err_vec_null  = []; 
     alpha_change = [];
-    AE.all_wIn = zeros(AE.p_iter, size(AE.wIn,1), size(AE.wIn,2));
-    AE.all_wOut = zeros(AE.p_iter, size(AE.wOut,1), size(AE.wOut,2));
+    beta_change = [];
+    gamma_change = [];
+    bias_movement = [];
+    %AE.all_wIn = zeros(AE.p_iter, size(AE.wIn,1), size(AE.wIn,2));
+    %AE.all_wOut = zeros(AE.p_iter, size(AE.wOut,1), size(AE.wOut,2));
         
     temp_wIn = zeros(size(AE.wIn));
     temp_wOut = zeros(size(AE.wOut));
@@ -69,29 +76,51 @@ function [ AE ] = AE_train( AE, train_x, test_x, isVerbose)
         
         [uns_er_test, error_vector_test] =  AE_feedforward( test_x, test_x ,AE);
         err_vec_test = [err_vec_test; error_vector_test'];
-        err_test = [err_test;uns_er_test];                
+        err_test = [err_test;uns_er_test];    
+        
+        [uns_er_null, error_vector_null] =  AE_feedforward( null_x, null_x ,AE);
+        err_vec_null = [err_vec_null; error_vector_null'];
+        err_null = [err_null;uns_er_null];                
                
-        alpha = [];
-        for h = 1:size(AE.wIn,2)-AE.isBias1
-            alpha = [alpha angle(AE.wIn(1:end-AE.isBias1,h),temp_wIn(1:end-AE.isBias1,h))];
+        alpha_  = [];
+        beta_   = [];
+        gamma_   =[];
+        bias_dist_movement_ = [];
+        for h = 1:AE.hid
+            alpha_ = [alpha_ angle(AE.wIn(1:end-AE.isBias1,h),temp_wIn(1:end-AE.isBias1,h))];
+            beta_  = [beta_  angle(AE.wOut(h,:),temp_wOut(h,:))];
+            if(AE.isBias2)
+                gamma_ = [gamma_ angle(AE.wOut(end,:),temp_wOut(end,:))];
+                bias_dist_movement_ = [bias_dist_movement_ sum((AE.wOut(end,:)-temp_wOut(end,:)).^2)];
+            end
         end
-        alpha_change = [alpha_change; alpha];
+        alpha_change    = [alpha_change; alpha_];
+        beta_change     = [beta_change; beta_];
+        gamma_change    = [gamma_change; gamma_];
+        bias_movement    = [bias_movement; bias_dist_movement_];
         
         if(isVerbose)
-            fprintf('iteration: %d/%d \tError: %3.3f\n',it,AE.p_iter,uns_er_train);
+            fprintf('iteration: %d/%d \tTrain Error: %3.6f\tTest Error: %3.6f\tNULL Error: %3.6f\n',it,AE.p_iter,uns_er_train,uns_er_test,uns_er_null);
         end
         temp_wIn = AE.wIn;
         temp_wOut = AE.wOut;
         
-        AE.all_wIn(it,:,:) = temp_wIn;
-        AE.all_wOut(it,:,:) = temp_wOut;
+%         AE.all_wIn(it,:,:) = temp_wIn;
+%         AE.all_wOut(it,:,:) = temp_wOut;
+        AE.all_wIn{it} = temp_wIn;
+        AE.all_wOut{it} = temp_wOut;
         
     end % end iteration
     AE.err_train        = err_train;
     AE.err_vec_train    = err_vec_train;
-    AE.err_test         = err_train;
-    AE.err_vec_test     = err_vec_train;
+    AE.err_test         = err_test;
+    AE.err_vec_test     = err_vec_test;
+    AE.err_null         = err_null;
+    AE.err_vec_null     = err_vec_null;
     AE.alpha_change     = alpha_change;
+    AE.beta_change      = beta_change;
+    AE.gamma_change     = gamma_change;
+    AE.bias_dist_movement = bias_movement;
     AE.samples          = samples;
 end
 

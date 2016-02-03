@@ -1,5 +1,5 @@
 classdef VARIATION_TYPE
    enumeration
-      RESPONSE, CATEGORICAL, CONTINUOUS
+      RESPONSE, CATEGORICAL, GAUSSIAN
    end
 end

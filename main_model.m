@@ -14,11 +14,14 @@ isVerbose = true;
 %number = 1;                                 % Read from command line!!!!!
 num_str=sprintf('%06d',number);
 
+folder_results = '/results/';
+
 tag = {'sup','uns'};
+tag2 = '_paper1_';
 
 for t=1:2
   
-    filename = strcat('exp_sup',num_str,'.mat');
+    filename = strcat('exp_',tag{t},tag2,num_str,'.mat');
     file = fullfile(pwd, folder_experiments, filename);
     if(exist(file,'file'))
         load(file,'experiment','model');

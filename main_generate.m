@@ -44,11 +44,11 @@ setting1.noise.parameter = 0.001;
 setting1.count = 600;      % number of samples
 [ data_var1, data_raw1 ] = Generate_dataset( setting1 );
 
-%Show_data( data_raw1, setting1.dim );
+Show_data( data_raw1, setting1.dim );
 
 % Save Dataset
 filename = 'dataset1.mat';
-if(~exist(folder_data))
+if(~exist('folder_data'))
     folder_data = '\data\';
 end
 data_raw = data_raw1; data_var = data_var1; setting = setting1;

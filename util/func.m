@@ -9,6 +9,15 @@ function [ y ] = func( x ,fname)
             y = log(1 + exp(x));
         case 'linear'
             y = x;
+        case 'tanh_step'
+            if x > 0.5
+                y = ones(size(x));
+            elseif x<-0.5
+                y=-ones(size(x));
+            else
+                y=x;
+            end
+                    
             
             
         case 'sigm_d'
@@ -20,6 +29,14 @@ function [ y ] = func( x ,fname)
             y = 1 ./ (1 + exp(-x));
         case 'linear_d'
             y = 1;
+        case 'tanh_step_d'
+            if x > 0.5
+                y = zeros(size(x));
+            elseif x<-0.5
+                y=zeros(size(x));
+            else
+                y=ones(size(x));
+            end
     end
     y(isnan(y))=0;
 %     if isnan(y)
